@@ -3,7 +3,6 @@ package packetcoder
 import (
 	. "bytes"
 	"errors"
-	"fmt"
 	"github.com/dgryski/go-bitstream"
 )
 
@@ -30,7 +29,7 @@ func (p *Packet) SetScheme(scheme *BitScheme) {
 }
 
 func (p *Packet) WriteValue(fieldName string, value uint64) error {
-	size, err := p.scheme.SizeOf(fieldName)
+	size, _, err := p.scheme.SizeAndOffsetOf(fieldName)
 	if err != nil {
 		return err
 	}
@@ -51,13 +50,11 @@ func (p *Packet) ReadValue(fieldName string) (uint64, error) {
 	p.readBuffer.Reset(p.writeBuffer.Bytes())
 	p.bitReader.Reset(p.readBuffer)
 
-	skippedValue, err := p.bitReader.ReadBits(int(offset))
-	fmt.Println(skippedValue)
+	_, err = p.bitReader.ReadBits(int(offset))
 	if err != nil {
 		return 0, err
 	}
 	value, err := p.bitReader.ReadBits(int(size))
-	fmt.Println(value)
 	return value, err
 }
 
