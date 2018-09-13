@@ -3,21 +3,25 @@ package packetcoder
 import (
 	. "bytes"
 	"errors"
+	"fmt"
 	"github.com/dgryski/go-bitstream"
 )
 
 type Packet struct {
-	scheme *BitScheme
-	data   *Buffer
-	writer *bitstream.BitWriter
-	reader *bitstream.BitReader
+	scheme      *BitScheme
+	writeBuffer *Buffer
+	readBuffer  *Reader
+	bitWriter   *bitstream.BitWriter
+	bitReader   *bitstream.BitReader
 }
 
 func NewPacket() *Packet {
 	packet := new(Packet)
-	packet.data = NewBuffer(nil)
-	packet.writer = bitstream.NewWriter(packet.data)
-	packet.reader = bitstream.NewReader(packet.data)
+	var data []byte
+	packet.writeBuffer = NewBuffer(data)
+	packet.readBuffer = NewReader(data)
+	packet.bitWriter = bitstream.NewWriter(packet.writeBuffer)
+	packet.bitReader = bitstream.NewReader(packet.readBuffer)
 	return packet
 }
 
@@ -30,7 +34,7 @@ func (p *Packet) WriteValue(fieldName string, value uint64) error {
 	if err != nil {
 		return err
 	}
-	err = p.writer.WriteBits(value, int(size))
+	err = p.bitWriter.WriteBits(value, int(size))
 	return err
 }
 
@@ -43,17 +47,22 @@ func (p *Packet) ReadValue(fieldName string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	p.reader.Reset(p.data)
-	_, err = p.reader.ReadBits(int(offset))
+
+	p.readBuffer.Reset(p.writeBuffer.Bytes())
+	p.bitReader.Reset(p.readBuffer)
+
+	skippedValue, err := p.bitReader.ReadBits(int(offset))
+	fmt.Println(skippedValue)
 	if err != nil {
 		return 0, err
 	}
-	value, err := p.reader.ReadBits(int(size))
+	value, err := p.bitReader.ReadBits(int(size))
+	fmt.Println(value)
 	return value, err
 }
 
 func (p *Packet) GetData() *Buffer {
-	return p.data
+	return p.writeBuffer
 }
 
 func (p *Packet) EncodeTo(writeBuffer *Buffer) {

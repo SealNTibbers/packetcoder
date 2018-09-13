@@ -78,7 +78,7 @@ func TestPacketFieldValues(t *testing.T) {
 
 	packet.WriteValue("head", 5)
 	packet.WriteValue("type", 105)
-	packet.WriteStuff("fill")
+
 	packet.WriteValue("crc", 99)
 
 	value, _ := packet.ReadValue("head")
