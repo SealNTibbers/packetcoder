@@ -25,7 +25,7 @@ func (p *Packet) SetScheme(scheme *BitScheme) {
 	p.scheme = scheme
 }
 
-func (p *Packet) SetValue(fieldName string, value uint64) error {
+func (p *Packet) WriteValue(fieldName string, value uint64) error {
 	size, err := p.scheme.SizeOf(fieldName)
 	if err != nil {
 		return err
@@ -34,8 +34,17 @@ func (p *Packet) SetValue(fieldName string, value uint64) error {
 	return err
 }
 
-func (p *Packet) GetValue(fieldName string) (uint64, error) {
-	size, err := p.scheme.SizeOf(fieldName)
+func (p *Packet) WriteStuff(fieldName string) error {
+	return p.WriteValue(fieldName, 0)
+}
+
+func (p *Packet) ReadValue(fieldName string) (uint64, error) {
+	size, offset, err := p.scheme.SizeAndOffsetOf(fieldName)
+	if err != nil {
+		return 0, err
+	}
+	p.reader.Reset(p.data)
+	_, err = p.reader.ReadBits(int(offset))
 	if err != nil {
 		return 0, err
 	}
@@ -108,4 +117,12 @@ func (s *BitScheme) SizeOf(fieldName string) (uint, error) {
 		return 0, errors.New("there is no such field as" + fieldName + "in this scheme")
 	}
 	return field.size, nil
+}
+
+func (s *BitScheme) SizeAndOffsetOf(fieldName string) (uint, uint, error) {
+	field := s.fields[fieldName]
+	if field == nil {
+		return 0, 0, errors.New("there is no such field as" + fieldName + "in this scheme")
+	}
+	return field.size, field.offset, nil
 }

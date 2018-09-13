@@ -76,14 +76,17 @@ func TestPacketFieldValues(t *testing.T) {
 	scheme.SetBitField("crc", 8)
 	packet.SetScheme(scheme)
 
-	packet.SetValue("head", 5)
-	packet.SetValue("type", 105)
-	packet.SetValue("fill", 0)
-	packet.SetValue("crc", 99)
+	packet.WriteValue("head", 5)
+	packet.WriteValue("type", 105)
+	packet.WriteStuff("fill")
+	packet.WriteValue("crc", 99)
 
-	value, _ := packet.GetValue("head")
+	value, _ := packet.ReadValue("head")
 	testutils.ASSERT_UEQ64(t, value, 5)
 
-	value, _ = packet.GetValue("type")
+	value, _ = packet.ReadValue("type")
 	testutils.ASSERT_UEQ64(t, value, 105)
+
+	value, _ = packet.ReadValue("crc")
+	testutils.ASSERT_UEQ64(t, value, 99)
 }
