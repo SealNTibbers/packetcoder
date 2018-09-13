@@ -6,21 +6,46 @@ import (
 	"testing"
 )
 
-func TestPacket(t *testing.T) {
-	packet := new(Packet)
-	t.Logf("%T", packet)
-}
-
 func TestPacketEncode(t *testing.T) {
-	packet := new(Packet)
+	packet := NewPacket()
+	scheme := NewBitScheme()
+	scheme.SetBitField("head", 4)
+	scheme.SetBitField("type", 8)
+	scheme.SetStuffBits("fill", 4)
+	scheme.SetBitField("crc", 8)
+	packet.SetScheme(scheme)
+
+	packet.WriteValue("head", 5)
+	packet.WriteValue("type", 105)
+	packet.WriteStuff("fill")
+	packet.WriteValue("crc", 99)
 	buf := bytes.NewBuffer(nil)
 	packet.EncodeTo(buf)
+	testutils.ASSERT_EQ(t, len(buf.Bytes()), 3)
+	testutils.ASSERT_UEQ(t, uint(buf.Bytes()[0]), 86)
+	testutils.ASSERT_UEQ(t, uint(buf.Bytes()[1]), 144)
+	testutils.ASSERT_UEQ(t, uint(buf.Bytes()[2]), 99)
 }
 
 func TestPacketDecode(t *testing.T) {
 	packet := new(Packet)
-	buf := bytes.NewBuffer(nil)
+	scheme := NewBitScheme()
+	scheme.SetBitField("head", 4)
+	scheme.SetBitField("type", 8)
+	scheme.SetStuffBits("fill", 4)
+	scheme.SetBitField("crc", 8)
+	packet.SetScheme(scheme)
+	buf := bytes.NewBuffer([]byte{86, 144, 99})
 	packet.DecodeFrom(buf)
+
+	value, _ := packet.ReadValue("head")
+	testutils.ASSERT_UEQ64(t, value, 5)
+
+	value, _ = packet.ReadValue("type")
+	testutils.ASSERT_UEQ64(t, value, 105)
+
+	value, _ = packet.ReadValue("crc")
+	testutils.ASSERT_UEQ64(t, value, 99)
 }
 
 func TestSchemeSetFields(t *testing.T) {
