@@ -66,3 +66,24 @@ func TestSchemeFieldsOffset(t *testing.T) {
 	offset, _ = scheme.OffsetOf("crc")
 	testutils.ASSERT_UEQ(t, offset, 16)
 }
+
+func TestPacketFieldValues(t *testing.T) {
+	packet := NewPacket()
+	scheme := NewBitScheme()
+	scheme.SetBitField("head", 4)
+	scheme.SetBitField("type", 8)
+	scheme.SetStuffBits("fill", 4)
+	scheme.SetBitField("crc", 8)
+	packet.SetScheme(scheme)
+
+	packet.SetValue("head", 5)
+	packet.SetValue("type", 105)
+	packet.SetValue("fill", 0)
+	packet.SetValue("crc", 99)
+
+	value, _ := packet.GetValue("head")
+	testutils.ASSERT_UEQ64(t, value, 5)
+
+	value, _ = packet.GetValue("type")
+	testutils.ASSERT_UEQ64(t, value, 105)
+}

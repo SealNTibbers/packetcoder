@@ -15,6 +15,12 @@ func ASSERT_EQ(t *testing.T, actual int, expected int) {
 	}
 }
 
+func ASSERT_UEQ64(t *testing.T, actual uint64, expected uint64) {
+	if expected != actual {
+		t.Fatalf("expected=%d, got=%d", expected, actual)
+	}
+}
+
 func ASSERT_UEQ(t *testing.T, actual uint, expected uint) {
 	if expected != actual {
 		t.Fatalf("expected=%d, got=%d", expected, actual)
