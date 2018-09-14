@@ -24,6 +24,12 @@ func NewPacket() *Packet {
 	return packet
 }
 
+func NewPacketFor(scheme *BitScheme) *Packet {
+	packet := NewPacket()
+	packet.SetScheme(scheme)
+	return packet
+}
+
 func (p *Packet) SetScheme(scheme *BitScheme) {
 	p.scheme = scheme
 }
