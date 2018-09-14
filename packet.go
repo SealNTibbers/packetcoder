@@ -68,24 +68,24 @@ func (p *Packet) GetData() *Buffer {
 	return p.writeBuffer
 }
 
-func (p *Packet) EncodeTo(buffer *Buffer) error {
+func (p *Packet) EncodeTo(buffer *Buffer) (*Packet, error) {
 	_, err := buffer.Write(p.writeBuffer.Bytes())
-	return err
+	return p, err
 }
 
-func (p *Packet) DecodeFrom(buffer *Buffer) error {
+func (p *Packet) DecodeFrom(buffer *Buffer) (*Packet, error) {
 	sizeOfPacketInByte := p.scheme.BitSize() / 8
 	var packetByteArray []byte
 	if int(sizeOfPacketInByte) <= len(buffer.Bytes()) {
 		packetByteArray = buffer.Next(int(sizeOfPacketInByte))
 	} else {
-		return errors.New("can't create packet because size of the packet is larger than size of the input buffer")
+		return nil, errors.New("can't create packet because size of the packet is larger than size of the input buffer")
 	}
 	p.writeBuffer = NewBuffer(packetByteArray)
 	p.readBuffer = NewReader(packetByteArray)
 	p.bitWriter = bitstream.NewWriter(p.writeBuffer)
 	p.bitReader = bitstream.NewReader(p.readBuffer)
-	return nil
+	return p, nil
 }
 
 type bitfield struct {
