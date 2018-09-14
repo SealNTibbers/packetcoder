@@ -29,54 +29,54 @@ var sampleJSON = `[
 ]`
 
 func TestReadingSchemeFromJSON(t *testing.T) {
-	var schemes []*BitScheme
+	var schemes map[string]*BitScheme
 	schemes = ReadSchemesFromString(sampleJSON)
 	testutils.ASSERT_EQ(t, len(schemes), 2)
-	testutils.ASSERT_UEQ(t, schemes[0].BitSize(), 24)
-	testutils.ASSERT_UEQ(t, schemes[1].BitSize(), 32)
-	size, err := schemes[0].SizeOf("head")
+	testutils.ASSERT_UEQ(t, schemes["packet1"].BitSize(), 24)
+	testutils.ASSERT_UEQ(t, schemes["packet2"].BitSize(), 32)
+	size, err := schemes["packet1"].SizeOf("head")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "head")
 	}
 	testutils.ASSERT_UEQ(t, size, 4)
 
-	size, err = schemes[0].SizeOf("type")
+	size, err = schemes["packet1"].SizeOf("type")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "type")
 	}
 	testutils.ASSERT_UEQ(t, size, 8)
 
-	size, err = schemes[0].SizeOf("fill")
+	size, err = schemes["packet1"].SizeOf("fill")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "fill")
 	}
 	testutils.ASSERT_UEQ(t, size, 4)
 
-	size, err = schemes[0].SizeOf("crc")
+	size, err = schemes["packet1"].SizeOf("crc")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "crc")
 	}
 	testutils.ASSERT_UEQ(t, size, 8)
 
-	size, err = schemes[1].SizeOf("head")
+	size, err = schemes["packet2"].SizeOf("head")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "head")
 	}
 	testutils.ASSERT_UEQ(t, size, 4)
 
-	size, err = schemes[1].SizeOf("fill")
+	size, err = schemes["packet2"].SizeOf("fill")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "fill")
 	}
 	testutils.ASSERT_UEQ(t, size, 4)
 
-	size, err = schemes[1].SizeOf("type")
+	size, err = schemes["packet2"].SizeOf("type")
 	if err != nil {
 		t.Fatalf("This field: |%s| not  found in packet.", "type")
 	}
 	testutils.ASSERT_UEQ(t, size, 8)
 
-	size, err = schemes[1].SizeOf("data")
+	size, err = schemes["packet2"].SizeOf("data")
 	if err != nil {
 		t.Fatalf("This field: |%s| not found in packet.", "data")
 	}
