@@ -63,8 +63,8 @@ func (p *Packet) GetData() *Buffer {
 }
 
 func (p *Packet) EncodeTo(buffer *Buffer) error {
-	buffer.Write(p.writeBuffer.Bytes())
-	return nil
+	_, err := buffer.Write(p.writeBuffer.Bytes())
+	return err
 }
 
 func (p *Packet) DecodeFrom(buffer *Buffer) error {
