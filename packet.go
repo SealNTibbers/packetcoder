@@ -73,7 +73,7 @@ func (p *Packet) DecodeFrom(buffer *Buffer) error {
 	if int(sizeOfPacketInByte) <= len(buffer.Bytes()) {
 		packetByteArray = buffer.Next(int(sizeOfPacketInByte))
 	} else {
-		return errors.New("Can't create packet, because size of packet more size of input buffer.")
+		return errors.New("can't create packet because size of the packet is larger than size of the input buffer")
 	}
 	p.writeBuffer = NewBuffer(packetByteArray)
 	p.readBuffer = NewReader(packetByteArray)
