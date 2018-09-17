@@ -115,19 +115,38 @@ func TestPacketFieldValues(t *testing.T) {
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
+	scheme.SetBitField("bigEndian", 32)
+	scheme.SetBitFieldLittleEndian("littleEndian", 32)
 	scheme.SetBitField("crc", 8)
 	packet.SetScheme(scheme)
 
 	packet.WriteValue("head", 5)
 	packet.WriteValue("type", 105)
 	packet.WriteStuff("fill")
+	packet.WriteValue("bigEndian", 12345678)
+	packet.WriteValue("littleEndian", 12345678)
 	packet.WriteValue("crc", 99)
+
+	field, _ := packet.Scheme.GetField("bigEndian")
+	if field.IsLittleEndian() {
+		t.Fatalf("this field should be big endian for now")
+	}
+	field.SetLittleEndian(true)
+	if !field.IsLittleEndian() {
+		t.Fatalf("this field should be little endian now")
+	}
 
 	value, _ := packet.ReadValue("head")
 	testutils.ASSERT_UEQ64(t, value, 5)
 
 	value, _ = packet.ReadValue("type")
 	testutils.ASSERT_UEQ64(t, value, 105)
+
+	value, _ = packet.ReadValue("bigEndian")
+	testutils.ASSERT_UEQ64(t, value, 1315027968)
+
+	value, _ = packet.ReadValue("littleEndian")
+	testutils.ASSERT_UEQ64(t, value, 12345678)
 
 	value, _ = packet.ReadValue("crc")
 	testutils.ASSERT_UEQ64(t, value, 99)
