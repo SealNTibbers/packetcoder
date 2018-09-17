@@ -150,3 +150,7 @@ func (s *BitScheme) SizeAndOffsetOf(fieldName string) (uint, uint, error) {
 	}
 	return field.size, field.offset, nil
 }
+
+func (s *BitScheme) GetFields() map[string]*bitfield {
+	return s.fields
+}
