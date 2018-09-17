@@ -7,7 +7,7 @@ import (
 )
 
 type Packet struct {
-	scheme      *BitScheme
+	Scheme      *BitScheme
 	writeBuffer *Buffer
 	readBuffer  *Reader
 	bitWriter   *bitstream.BitWriter
@@ -31,11 +31,11 @@ func NewPacketFor(scheme *BitScheme) *Packet {
 }
 
 func (p *Packet) SetScheme(scheme *BitScheme) {
-	p.scheme = scheme
+	p.Scheme = scheme
 }
 
 func (p *Packet) WriteValue(fieldName string, value uint64) error {
-	size, _, err := p.scheme.SizeAndOffsetOf(fieldName)
+	size, _, err := p.Scheme.SizeAndOffsetOf(fieldName)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (p *Packet) WriteStuff(fieldName string) error {
 }
 
 func (p *Packet) ReadValue(fieldName string) (uint64, error) {
-	size, offset, err := p.scheme.SizeAndOffsetOf(fieldName)
+	size, offset, err := p.Scheme.SizeAndOffsetOf(fieldName)
 	if err != nil {
 		return 0, err
 	}
@@ -74,7 +74,7 @@ func (p *Packet) EncodeTo(buffer *Buffer) (*Packet, error) {
 }
 
 func (p *Packet) DecodeFrom(buffer *Buffer) (*Packet, error) {
-	sizeOfPacketInByte := p.scheme.BitSize() / 8
+	sizeOfPacketInByte := p.Scheme.BitSize() / 8
 	var packetByteArray []byte
 	if int(sizeOfPacketInByte) <= len(buffer.Bytes()) {
 		packetByteArray = buffer.Next(int(sizeOfPacketInByte))

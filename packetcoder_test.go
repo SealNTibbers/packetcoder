@@ -37,7 +37,7 @@ func TestPacketDecode(t *testing.T) {
 	packet.SetScheme(scheme)
 	buf := bytes.NewBuffer([]byte{86, 144, 99, 86, 144, 140, 86, 144})
 	// decode first packet
-	err := packet.DecodeFrom(buf)
+	_, err := packet.DecodeFrom(buf)
 
 	value, _ := packet.ReadValue("head")
 	testutils.ASSERT_UEQ64(t, value, 5)
@@ -49,7 +49,7 @@ func TestPacketDecode(t *testing.T) {
 	testutils.ASSERT_UEQ64(t, value, 99)
 
 	// decode second packet
-	err = packet.DecodeFrom(buf)
+	_, err = packet.DecodeFrom(buf)
 
 	value, _ = packet.ReadValue("head")
 	testutils.ASSERT_UEQ64(t, value, 5)
@@ -61,7 +61,7 @@ func TestPacketDecode(t *testing.T) {
 	testutils.ASSERT_UEQ64(t, value, 140)
 
 	//decode remainder and we should get error, because size of packet more size of buffer
-	err = packet.DecodeFrom(buf)
+	_, err = packet.DecodeFrom(buf)
 	testutils.ASSERT_TRUE(t, err != nil)
 }
 
