@@ -88,6 +88,13 @@ func (p *Packet) DecodeFrom(buffer *Buffer) (*Packet, error) {
 	return p, nil
 }
 
+func (p *Packet) GetName() string {
+	if p.Scheme == nil {
+		return ""
+	}
+	return p.Scheme.GetName()
+}
+
 type bitfield struct {
 	name   string
 	size   uint
@@ -99,12 +106,14 @@ func (f *bitfield) bitSize() uint {
 }
 
 type BitScheme struct {
+	name   string
 	fields map[string]*bitfield
 	size   uint
 }
 
-func NewBitScheme() *BitScheme {
+func NewBitScheme(name string) *BitScheme {
 	scheme := new(BitScheme)
+	scheme.name = name
 	scheme.fields = make(map[string]*bitfield)
 	return scheme
 }
@@ -153,4 +162,8 @@ func (s *BitScheme) SizeAndOffsetOf(fieldName string) (uint, uint, error) {
 
 func (s *BitScheme) GetFields() map[string]*bitfield {
 	return s.fields
+}
+
+func (s *BitScheme) GetName() string {
+	return s.name
 }

@@ -8,7 +8,7 @@ import (
 
 func TestPacketEncode(t *testing.T) {
 	packet := NewPacket()
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
@@ -29,7 +29,7 @@ func TestPacketEncode(t *testing.T) {
 
 func TestPacketDecode(t *testing.T) {
 	packet := new(Packet)
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
@@ -66,14 +66,14 @@ func TestPacketDecode(t *testing.T) {
 }
 
 func TestSchemeSetFields(t *testing.T) {
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
 }
 
 func TestSchemeBitSize(t *testing.T) {
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
@@ -96,7 +96,7 @@ func TestSchemeBitSize(t *testing.T) {
 }
 
 func TestSchemeFieldsOffset(t *testing.T) {
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)
@@ -111,7 +111,7 @@ func TestSchemeFieldsOffset(t *testing.T) {
 
 func TestPacketFieldValues(t *testing.T) {
 	packet := NewPacket()
-	scheme := NewBitScheme()
+	scheme := NewBitScheme("test")
 	scheme.SetBitField("head", 4)
 	scheme.SetBitField("type", 8)
 	scheme.SetStuffBits("fill", 4)

@@ -19,7 +19,7 @@ func ReadSchemesFromString(dataString string) map[string]*BitScheme {
 	json.Unmarshal([]byte(dataString), &packets)
 	var currentScheme *BitScheme
 	for i := 0; i < len(packets); i++ {
-		currentScheme = NewBitScheme()
+		currentScheme = NewBitScheme(packets[i].Name)
 		for j := 0; j < len(packets[i].Fields); j++ {
 			currentScheme.SetBitField(packets[i].Fields[j].Name, packets[i].Fields[j].Size)
 		}
