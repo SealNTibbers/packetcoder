@@ -23,7 +23,7 @@ var sampleJSON = `[
 					{"name": "head", "size": 4},
 					{"name": "fill", "size": 4},
 					{"name": "type", "size": 8},
-					{"name": "data", "size": 16}
+					{"name": "data", "size": 16, "littleEndian": true}
 				]
 	}
 ]`
