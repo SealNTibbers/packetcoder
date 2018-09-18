@@ -15,25 +15,25 @@ func ASSERT_EQ(t *testing.T, actual int, expected int) {
 	}
 }
 
-func ASSERT_UEQ64(t *testing.T, actual uint64, expected uint64) {
+func ASSERT_U64_EQ(t *testing.T, actual uint64, expected uint64) {
 	if expected != actual {
 		t.Fatalf("expected=%d, got=%d", expected, actual)
 	}
 }
 
-func ASSERT_UEQ(t *testing.T, actual uint, expected uint) {
+func ASSERT_U_EQ(t *testing.T, actual uint, expected uint) {
 	if expected != actual {
 		t.Fatalf("expected=%d, got=%d", expected, actual)
 	}
 }
 
-func ASSERT_FLOAT32_EQ(t *testing.T, actual float32, expected float32) {
+func ASSERT_F32_EQ(t *testing.T, actual float32, expected float32) {
 	if expected != actual {
 		t.Fatalf("expected=%e, got=%e", expected, actual)
 	}
 }
 
-func ASSERT_FLOAT64_EQ(t *testing.T, actual float64, expected float64) {
+func ASSERT_F64_EQ(t *testing.T, actual float64, expected float64) {
 	if expected != actual {
 		t.Fatalf("expected=%e, got=%e", expected, actual)
 	}
