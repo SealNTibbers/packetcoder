@@ -27,6 +27,12 @@ func ASSERT_U_EQ(t *testing.T, actual uint, expected uint) {
 	}
 }
 
+func ASSERT_BYTE_EQ(t *testing.T, actual byte, expected byte) {
+	if expected != actual {
+		t.Fatalf("expected=%x, got=%x", expected, actual)
+	}
+}
+
 func ASSERT_F32_EQ(t *testing.T, actual float32, expected float32) {
 	if expected != actual {
 		t.Fatalf("expected=%e, got=%e", expected, actual)

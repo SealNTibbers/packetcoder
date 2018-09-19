@@ -24,9 +24,9 @@ func ReadSchemesFromString(dataString string) map[string]*BitScheme {
 		for j := 0; j < len(packets[i].Fields); j++ {
 			field := packets[i].Fields[j]
 			if field.LittleEndian {
-				currentScheme.SetBitFieldLittleEndian(field.Name, field.Size)
+				currentScheme.AddBitFieldLittleEndian(field.Name, field.Size)
 			} else {
-				currentScheme.SetBitField(field.Name, field.Size)
+				currentScheme.AddBitField(field.Name, field.Size)
 			}
 		}
 		mapOfSchemes[packets[i].Name] = currentScheme

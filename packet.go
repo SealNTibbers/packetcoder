@@ -3,9 +3,22 @@ package packetcoder
 import (
 	. "bytes"
 	"errors"
-	"github.com/dgryski/go-bitstream"
+	"github.com/SealNTibbers/go-bitstream"
 	"math/bits"
 )
+
+func ReverseBytes(bytes []byte) []byte {
+	newBytes := make([]byte, len(bytes))
+	var i, j int
+	for i, j = 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
+		newBytes[i], newBytes[j] = bytes[j], bytes[i]
+	}
+	size := len(bytes)
+	if size%2 != 0 {
+		newBytes[i] = bytes[i]
+	}
+	return newBytes
+}
 
 type Packet struct {
 	Scheme      *BitScheme
@@ -35,59 +48,44 @@ func (p *Packet) SetScheme(scheme *BitScheme) {
 	p.Scheme = scheme
 }
 
-func (p *Packet) WriteValue(fieldName string, value uint64) error {
+func (p *Packet) WriteValue64(fieldName string, value uint64) error {
 	field, err := p.Scheme.GetField(fieldName)
 	if err != nil {
 		return err
 	}
-	err = field.WriteValueInto(p, value)
+	err = field.WriteValue64Into(p, value)
 	return err
 }
 
-func (b *bitfield) WriteValueInto(packet *Packet, value uint64) error {
-	var data uint64
-
-	if b.littleEndian {
-		data = bits.ReverseBytes64(value)
-		data = data >> (64 - b.size)
-	} else {
-		data = value
+func (p *Packet) WriteBytes(fieldName string, value []byte) error {
+	field, err := p.Scheme.GetField(fieldName)
+	if err != nil {
+		return err
 	}
-	err := packet.bitWriter.WriteBits(data, int(b.size))
+	err = field.WriteBytesInto(p, value)
 	return err
 }
 
 func (p *Packet) WriteStuff(fieldName string) error {
-	return p.WriteValue(fieldName, 0)
+	return p.WriteValue64(fieldName, 0)
 }
 
-func (p *Packet) ReadValue(fieldName string) (uint64, error) {
+func (p *Packet) ReadValue64(fieldName string) (uint64, error) {
 	field, err := p.Scheme.GetField(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	value, err := field.ReadValueFrom(p, fieldName)
+	value, err := field.ReadValue64From(p)
 	return value, err
 }
 
-func (b *bitfield) ReadValueFrom(packet *Packet, fieldName string) (uint64, error) {
-	var data uint64
-
-	packet.readBuffer.Reset(packet.writeBuffer.Bytes())
-	packet.bitReader.Reset(packet.readBuffer)
-
-	_, err := packet.bitReader.ReadBits(int(b.offset))
+func (p *Packet) ReadBytesValue(fieldName string) ([]byte, error) {
+	field, err := p.Scheme.GetField(fieldName)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	value, err := packet.bitReader.ReadBits(int(b.size))
-	if b.littleEndian {
-		data = bits.ReverseBytes64(value)
-		data = data >> (64 - b.size)
-	} else {
-		data = value
-	}
-	return data, err
+	value, err := field.ReadBytesValueFrom(p)
+	return value, err
 }
 
 func (p *Packet) GetData() *Buffer {
@@ -105,7 +103,7 @@ func (p *Packet) DecodeFrom(buffer *Buffer) (*Packet, error) {
 	if int(sizeOfPacketInByte) <= len(buffer.Bytes()) {
 		packetByteArray = buffer.Next(int(sizeOfPacketInByte))
 	} else {
-		return nil, errors.New("can't create packet because size of the packet is larger than size of the input buffer")
+		return nil, errors.New("can't create packet because sizeInBits of the packet is larger than sizeInBits of the input buffer")
 	}
 	p.writeBuffer = NewBuffer(packetByteArray)
 	p.readBuffer = NewReader(packetByteArray)
@@ -123,13 +121,14 @@ func (p *Packet) GetName() string {
 
 type bitfield struct {
 	name         string
-	size         uint
+	sizeInBits   uint
+	sizeInBytes  uint
 	offset       uint
 	littleEndian bool
 }
 
 func (f *bitfield) bitSize() uint {
-	return f.size
+	return f.sizeInBits
 }
 
 func (f *bitfield) IsLittleEndian() bool {
@@ -139,6 +138,74 @@ func (f *bitfield) IsLittleEndian() bool {
 func (f *bitfield) SetLittleEndian(littleEndian bool) *bitfield {
 	f.littleEndian = littleEndian
 	return f
+}
+
+func (b *bitfield) WriteValue64Into(packet *Packet, value uint64) error {
+	var data uint64
+
+	if b.littleEndian {
+		data = bits.ReverseBytes64(value)
+		data = data >> (64 - b.sizeInBits)
+	} else {
+		data = value
+	}
+	err := packet.bitWriter.WriteBits(data, int(b.sizeInBits))
+	return err
+}
+
+func (b *bitfield) WriteBytesInto(packet *Packet, value []byte) error {
+	var data []byte
+	var err error
+	if b.littleEndian {
+		data = ReverseBytes(value)
+	} else {
+		data = value
+	}
+	err = packet.bitWriter.WriteBytes(data)
+	return err
+}
+
+func (b *bitfield) ReadValue64From(packet *Packet) (uint64, error) {
+	var data uint64
+
+	packet.readBuffer.Reset(packet.writeBuffer.Bytes())
+	packet.bitReader.Reset(packet.readBuffer)
+
+	_, err := packet.bitReader.ReadBits(int(b.offset))
+	if err != nil {
+		return 0, err
+	}
+	value, err := packet.bitReader.ReadBits(int(b.sizeInBits))
+	if b.littleEndian {
+		data = bits.ReverseBytes64(value)
+		data = data >> (64 - b.sizeInBits)
+	} else {
+		data = value
+	}
+	return data, err
+}
+
+func (b *bitfield) ReadBytesValueFrom(packet *Packet) ([]byte, error) {
+	var data []byte
+
+	packet.readBuffer.Reset(packet.writeBuffer.Bytes())
+	packet.bitReader.Reset(packet.readBuffer)
+
+	_, err := packet.bitReader.ReadBits(int(b.offset))
+	if err != nil {
+		return nil, err
+	}
+
+	var i uint
+	for i = 0; i < b.sizeInBytes; i++ {
+		dataByte, err := packet.bitReader.ReadByte()
+		data = append(data, dataByte)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return data, err
 }
 
 type BitScheme struct {
@@ -154,26 +221,45 @@ func NewBitScheme(name string) *BitScheme {
 	return scheme
 }
 
-func (s *BitScheme) SetBitField(fieldName string, fieldSize uint) *bitfield {
+func (s *BitScheme) AddBitField(fieldName string, sizeInBits uint) *bitfield {
 	field := new(bitfield)
 	field.name = fieldName
-	field.size = fieldSize
+	field.sizeInBits = sizeInBits
 	field.offset = s.size
-	s.size += field.size
+	s.size += field.sizeInBits
 
 	s.fields[fieldName] = field
 
 	return field
 }
 
-func (s *BitScheme) SetBitFieldLittleEndian(fieldName string, fieldSize uint) *bitfield {
-	field := s.SetBitField(fieldName, fieldSize)
+func (s *BitScheme) AddBitFieldLittleEndian(fieldName string, sizeInBits uint) *bitfield {
+	field := s.AddBitField(fieldName, sizeInBits)
 	field.littleEndian = true
 	return field
 }
 
-func (s *BitScheme) SetStuffBits(fieldName string, fieldSize uint) {
-	s.SetBitField(fieldName, fieldSize)
+func (s *BitScheme) AddByteField(fieldName string, sizeInBytes uint) *bitfield {
+	field := new(bitfield)
+	field.name = fieldName
+	field.sizeInBytes = sizeInBytes
+	field.sizeInBits = sizeInBytes * 8
+	field.offset = s.size
+	s.size += field.sizeInBits
+
+	s.fields[fieldName] = field
+
+	return field
+}
+
+func (s *BitScheme) AddByteFieldLittleEndian(fieldName string, sizeInBytes uint) *bitfield {
+	field := s.AddByteField(fieldName, sizeInBytes)
+	field.littleEndian = true
+	return field
+}
+
+func (s *BitScheme) AddStuffBits(fieldName string, fieldSize uint) {
+	s.AddBitField(fieldName, fieldSize)
 }
 
 func (s *BitScheme) BitSize() uint {
@@ -196,12 +282,20 @@ func (s *BitScheme) OffsetOf(fieldName string) (uint, error) {
 	return field.offset, nil
 }
 
-func (s *BitScheme) SizeOf(fieldName string) (uint, error) {
+func (s *BitScheme) BitSizeOf(fieldName string) (uint, error) {
 	field, err := s.GetField(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return field.size, nil
+	return field.sizeInBits, nil
+}
+
+func (s *BitScheme) ByteSizeOf(fieldName string) (uint, error) {
+	field, err := s.GetField(fieldName)
+	if err != nil {
+		return 0, err
+	}
+	return field.sizeInBytes, nil
 }
 
 func (s *BitScheme) SizeAndOffsetOf(fieldName string) (uint, uint, error) {
@@ -209,7 +303,7 @@ func (s *BitScheme) SizeAndOffsetOf(fieldName string) (uint, uint, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	return field.size, field.offset, nil
+	return field.sizeInBits, field.offset, nil
 }
 
 func (s *BitScheme) GetFields() map[string]*bitfield {
