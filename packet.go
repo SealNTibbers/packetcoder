@@ -166,27 +166,30 @@ func (b *bitfield) WriteBytesInto(packet *Packet, value []byte) error {
 }
 
 func (b *bitfield) ReadValue64From(packet *Packet) (uint64, error) {
-	var data uint64
+	var value uint64
 
 	packet.readBuffer.Reset(packet.writeBuffer.Bytes())
 	packet.bitReader.Reset(packet.readBuffer)
-
+	tmp := packet.writeBuffer.Bytes()
+	if len(tmp) > 0 {
+		//
+	}
 	_, err := packet.bitReader.ReadBits(int(b.offset))
 	if err != nil {
 		return 0, err
 	}
-	value, err := packet.bitReader.ReadBits(int(b.sizeInBits))
+	data, err := packet.bitReader.ReadBits(int(b.sizeInBits))
 	if b.littleEndian {
-		data = bits.ReverseBytes64(value)
-		data = data >> (64 - b.sizeInBits)
+		value = bits.ReverseBytes64(data)
+		value = value >> (64 - b.sizeInBits)
 	} else {
-		data = value
+		value = data
 	}
-	return data, err
+	return value, err
 }
 
 func (b *bitfield) ReadBytesValueFrom(packet *Packet) ([]byte, error) {
-	var data []byte
+	var data, value []byte
 
 	packet.readBuffer.Reset(packet.writeBuffer.Bytes())
 	packet.bitReader.Reset(packet.readBuffer)
@@ -195,7 +198,6 @@ func (b *bitfield) ReadBytesValueFrom(packet *Packet) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	var i uint
 	for i = 0; i < b.sizeInBytes; i++ {
 		dataByte, err := packet.bitReader.ReadByte()
@@ -204,8 +206,12 @@ func (b *bitfield) ReadBytesValueFrom(packet *Packet) ([]byte, error) {
 			return nil, err
 		}
 	}
-
-	return data, err
+	if b.littleEndian {
+		value = ReverseBytes(data)
+	} else {
+		value = data
+	}
+	return value, err
 }
 
 type BitScheme struct {

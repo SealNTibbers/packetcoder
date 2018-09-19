@@ -176,8 +176,8 @@ func TestPacketFieldBytesValue(t *testing.T) {
 	packet.WriteValue64("head", 0x05)
 	packet.WriteValue64("type", 0x69)
 	packet.WriteBytes("data", []byte{0x01, 0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89, 0xAB})
-	packet.WriteBytes("littleEndian", []byte{0x56, 0x67, 0x78, 0x89, 0xAB})
 	packet.WriteStuff("fill")
+	packet.WriteBytes("littleEndian", []byte{0x56, 0x67, 0x78, 0x89, 0xAB})
 	packet.WriteValue64("crc", 99)
 
 	bytes := packet.GetData().Bytes()
@@ -187,10 +187,19 @@ func TestPacketFieldBytesValue(t *testing.T) {
 	testutils.ASSERT_BYTE_EQ(t, bytes[3], 0x22)
 	testutils.ASSERT_BYTE_EQ(t, bytes[10], 0x9A)
 
-	testutils.ASSERT_BYTE_EQ(t, bytes[11], 0xBA)
-	testutils.ASSERT_BYTE_EQ(t, bytes[12], 0xB8)
-	testutils.ASSERT_BYTE_EQ(t, bytes[13], 0x97)
-	testutils.ASSERT_BYTE_EQ(t, bytes[14], 0x86)
+	testutils.ASSERT_BYTE_EQ(t, bytes[11], 0xB0)
+	/*
+		testutils.ASSERT_BYTE_EQ(t, bytes[12], 0x56)
+		testutils.ASSERT_BYTE_EQ(t, bytes[13], 0x67)
+		testutils.ASSERT_BYTE_EQ(t, bytes[14], 0x78)
+		testutils.ASSERT_BYTE_EQ(t, bytes[15], 0x89)
+		testutils.ASSERT_BYTE_EQ(t, bytes[16], 0xAB)
+		testutils.ASSERT_BYTE_EQ(t, bytes[17], 99)*/
+	testutils.ASSERT_BYTE_EQ(t, bytes[12], 0xAB)
+	testutils.ASSERT_BYTE_EQ(t, bytes[13], 0x89)
+	testutils.ASSERT_BYTE_EQ(t, bytes[14], 0x78)
+	testutils.ASSERT_BYTE_EQ(t, bytes[15], 0x67)
+	testutils.ASSERT_BYTE_EQ(t, bytes[16], 0x56)
 
 	value, _ := packet.ReadValue64("head")
 	testutils.ASSERT_U64_EQ(t, value, 5)
@@ -198,10 +207,18 @@ func TestPacketFieldBytesValue(t *testing.T) {
 	value, _ = packet.ReadValue64("type")
 	testutils.ASSERT_U64_EQ(t, value, 105)
 
-	bytesValue, _ := packet.ReadBytesValue("data")
-	testutils.ASSERT_U_EQ(t, uint(bytesValue[0]), 0x01)
-	testutils.ASSERT_U_EQ(t, uint(bytesValue[9]), 0xAB)
+	value, _ = packet.ReadValue64("fill")
+	testutils.ASSERT_U64_EQ(t, value, 0)
 
 	value, _ = packet.ReadValue64("crc")
 	testutils.ASSERT_U64_EQ(t, value, 99)
+
+	bytesValue1, _ := packet.ReadBytesValue("data")
+	testutils.ASSERT_BYTE_EQ(t, bytesValue1[0], 0x01)
+	testutils.ASSERT_BYTE_EQ(t, bytesValue1[4], 0x45)
+	testutils.ASSERT_BYTE_EQ(t, bytesValue1[9], 0xAB)
+
+	bytesValue2, _ := packet.ReadBytesValue("littleEndian")
+	testutils.ASSERT_BYTE_EQ(t, bytesValue2[1], 0x67)
+	testutils.ASSERT_BYTE_EQ(t, bytesValue2[4], 0xAB)
 }
