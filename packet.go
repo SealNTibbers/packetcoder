@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/SealNTibbers/go-bitstream"
 	"math/bits"
+	"net"
 )
 
 func ReverseBytes(bytes []byte) []byte {
@@ -20,12 +21,31 @@ func ReverseBytes(bytes []byte) []byte {
 	return newBytes
 }
 
+type SmartPacket interface {
+	SetScheme(*BitScheme)
+	GetScheme() *BitScheme
+	WriteValue64(fieldName string, value uint64) error
+	WriteBytes(fieldName string, value []byte) error
+	WriteStuff(fieldName string) error
+	ReadValue64(fieldName string) (uint64, error)
+	ReadBytesValue(fieldName string) ([]byte, error)
+	GetData() *Buffer
+	EncodeTo(buffer *Buffer) (*Packet, error)
+	DecodeFrom(buffer *Buffer) (*Packet, error)
+	GetName() string
+
+	ProcessDecoded(rawData []byte, conn net.Conn)
+}
+
 type Packet struct {
 	Scheme      *BitScheme
 	writeBuffer *Buffer
 	readBuffer  *Reader
 	bitWriter   *bitstream.BitWriter
 	bitReader   *bitstream.BitReader
+}
+
+func (p *Packet) ProcessDecoded(rawData []byte, conn net.Conn) {
 }
 
 func NewPacket() *Packet {
@@ -46,6 +66,10 @@ func NewPacketFor(scheme *BitScheme) *Packet {
 
 func (p *Packet) SetScheme(scheme *BitScheme) {
 	p.Scheme = scheme
+}
+
+func (p *Packet) GetScheme() *BitScheme {
+	return p.Scheme
 }
 
 func (p *Packet) WriteValue64(fieldName string, value uint64) error {
