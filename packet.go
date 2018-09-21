@@ -30,8 +30,8 @@ type SmartPacket interface {
 	ReadValue64(fieldName string) (uint64, error)
 	ReadBytesValue(fieldName string) ([]byte, error)
 	GetData() *Buffer
-	EncodeTo(buffer *Buffer) (*Packet, error)
-	DecodeFrom(buffer *Buffer) (*Packet, error)
+	EncodeTo(buffer *Buffer) (SmartPacket, error)
+	DecodeFrom(buffer *Buffer) (SmartPacket, error)
 	GetName() string
 
 	ProcessDecoded(rawData []byte, conn net.Conn)
@@ -116,12 +116,12 @@ func (p *Packet) GetData() *Buffer {
 	return p.writeBuffer
 }
 
-func (p *Packet) EncodeTo(buffer *Buffer) (*Packet, error) {
+func (p *Packet) EncodeTo(buffer *Buffer) (SmartPacket, error) {
 	_, err := buffer.Write(p.writeBuffer.Bytes())
 	return p, err
 }
 
-func (p *Packet) DecodeFrom(buffer *Buffer) (*Packet, error) {
+func (p *Packet) DecodeFrom(buffer *Buffer) (SmartPacket, error) {
 	sizeOfPacketInByte := p.Scheme.BitSize() / 8
 	var packetByteArray []byte
 	if int(sizeOfPacketInByte) <= len(buffer.Bytes()) {
