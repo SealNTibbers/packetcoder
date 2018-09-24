@@ -29,6 +29,7 @@ type SmartPacket interface {
 	ReadValue64(fieldName string) (uint64, error)
 	ReadBytesValue(fieldName string) ([]byte, error)
 	GetData() *Buffer
+	SetData(buffer *Buffer)
 	EncodeTo(buffer *Buffer) (SmartPacket, error)
 	DecodeFrom(buffer *Buffer) (SmartPacket, error)
 	GetName() string
@@ -118,6 +119,11 @@ func (p *Packet) ReadBytesValue(fieldName string) ([]byte, error) {
 
 func (p *Packet) GetData() *Buffer {
 	return p.writeBuffer
+}
+
+func (p *Packet) SetData(buffer *Buffer) {
+	//TODO Initialize readers and writers???
+	p.writeBuffer = buffer
 }
 
 func (p *Packet) EncodeTo(buffer *Buffer) (SmartPacket, error) {
