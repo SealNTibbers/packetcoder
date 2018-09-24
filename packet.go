@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/SealNTibbers/go-bitstream"
 	"math/bits"
-	"net"
 )
 
 func ReverseBytes(bytes []byte) []byte {
@@ -35,7 +34,7 @@ type SmartPacket interface {
 	GetName() string
 
 	ProcessDecoded(rawData []byte, packetQueue chan SmartPacket)
-	ProcessPreEncode() []byte
+	ProcessPreEncode(rawData []byte) []byte
 }
 
 type Packet struct {
@@ -49,7 +48,7 @@ type Packet struct {
 func (p *Packet) ProcessDecoded(rawData []byte, packetQueue chan SmartPacket) {
 }
 
-func (p *Packet) ProcessPreEncode() []byte {
+func (p *Packet) ProcessPreEncode(rawData []byte) []byte {
 	return p.GetData().Bytes()
 }
 
