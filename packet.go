@@ -35,6 +35,7 @@ type SmartPacket interface {
 	GetName() string
 
 	ProcessDecoded(rawData []byte, conn net.Conn)
+	PreEncode() []byte
 }
 
 type Packet struct {
@@ -46,6 +47,10 @@ type Packet struct {
 }
 
 func (p *Packet) ProcessDecoded(rawData []byte, conn net.Conn) {
+}
+
+func (p *Packet) PreEncode() []byte {
+	return p.GetData().Bytes()
 }
 
 func NewPacket() *Packet {
