@@ -34,8 +34,8 @@ type SmartPacket interface {
 	DecodeFrom(buffer *Buffer) (SmartPacket, error)
 	GetName() string
 
-	ProcessDecoded(rawData []byte, conn net.Conn)
-	PreEncode() []byte
+	ProcessDecoded(rawData []byte, packetQueue chan SmartPacket)
+	ProcessPreEncode() []byte
 }
 
 type Packet struct {
@@ -46,10 +46,10 @@ type Packet struct {
 	bitReader   *bitstream.BitReader
 }
 
-func (p *Packet) ProcessDecoded(rawData []byte, conn net.Conn) {
+func (p *Packet) ProcessDecoded(rawData []byte, packetQueue chan SmartPacket) {
 }
 
-func (p *Packet) PreEncode() []byte {
+func (p *Packet) ProcessPreEncode() []byte {
 	return p.GetData().Bytes()
 }
 
