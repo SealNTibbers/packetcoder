@@ -23,7 +23,7 @@ When you use this library you should choose one of two ways to set scheme:
 ```
 2) Fill scheme from JSON string with description of packet
 ``` go
-  var sampleJSON = [{
+  var sampleJSON = `{
 		"name": "testPacket",
 		"fields":
                 [
@@ -32,10 +32,10 @@ When you use this library you should choose one of two ways to set scheme:
 					{"name": "fill", "sizeInBits": 4},
 					{"name": "crc", "sizeInBits": 8}
 				]
-	}]
-  var schemes map[string]*BitScheme
-	schemes = ReadSchemesFromString(sampleJSON)
-  packet.SetScheme(schemes["testPacket"])
+	}`
+  var scheme *BitScheme
+	scheme = ReadSchemeFromString(sampleJSON)
+  packet.SetScheme(scheme)
  ```
 To fill packet with data you can use:
 ``` go
