@@ -27,10 +27,10 @@ When you use this library you should choose one of two ways to set scheme:
 		"name": "testPacket",
 		"fields":
                 [
-					{"name": "head", "sizeInBits": 4},
-					{"name": "type", "sizeInBits": 8},
-					{"name": "fill", "sizeInBits": 4},
-					{"name": "crc", "sizeInBits": 8}
+					{"name": "head", "size": 4},
+					{"name": "type", "size": 8},
+					{"name": "fill", "size": 4},
+					{"name": "crc", "size": 8}
 				]
 	}`
   var scheme *BitScheme
