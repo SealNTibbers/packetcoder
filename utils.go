@@ -13,6 +13,22 @@ type JSONField struct {
 	LittleEndian bool
 }
 
+func ReadSchemeFromString(dataString string) *BitScheme {
+	var packet JSONPacket
+	json.Unmarshal([]byte(dataString), &packet)
+	var currentScheme *BitScheme
+	currentScheme = NewBitScheme(packet.Name)
+	for j := 0; j < len(packet.Fields); j++ {
+		field := packet.Fields[j]
+		if field.LittleEndian {
+			currentScheme.AddBitFieldLittleEndian(field.Name, field.Size)
+		} else {
+			currentScheme.AddBitField(field.Name, field.Size)
+		}
+	}
+	return currentScheme
+}
+
 func ReadSchemesFromString(dataString string) map[string]*BitScheme {
 	var mapOfSchemes map[string]*BitScheme
 	mapOfSchemes = make(map[string]*BitScheme)
